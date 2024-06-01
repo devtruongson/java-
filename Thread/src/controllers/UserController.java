@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import thread.Connect;
+import model.User;
 
 /**
  *
@@ -21,12 +22,12 @@ public class UserController {
 
     }
 
-    public void CreateUser(String email, String password, String name, int age, String address, String job, JFrame parent) {
+    public void createUser(User user,JFrame parent) {
         try {
             Connect connect = new Connect();
             Connection con = connect.getConn();
 
-            boolean userExit = checkUserExit(email);
+            boolean userExit = checkUserExit(user.getEmail());
             if (userExit) {
                 JOptionPane.showMessageDialog(parent, "Email da ton tai!");
                 return;
@@ -34,12 +35,12 @@ public class UserController {
 
             String query = "insert into user (email, password, name, age, address, job) values (?,?,?,?,?,?);";
             PreparedStatement pstmt = con.prepareStatement(query);
-            pstmt.setString(1, email);
-            pstmt.setString(2, password);
-            pstmt.setString(3, name);
-            pstmt.setInt(4, age);
-            pstmt.setString(5, address);
-            pstmt.setString(6, job);
+            pstmt.setString(1, user.getEmail());
+            pstmt.setString(2, user.getPassword());
+            pstmt.setString(3, user.getName());
+            pstmt.setInt(4, user.getAge());
+            pstmt.setString(5, user.getAddress());
+            pstmt.setString(6, user.getJob());
 
             int row = pstmt.executeUpdate();
             if (row > 0) {
@@ -68,30 +69,30 @@ public class UserController {
         }
     }
 
-    public void updateUser(String email, String password, String name, int age, String address, String job, int id, JFrame parent) {
+    public void updateUser(User user, JFrame parent) {
         try {
             Connect connect = new Connect();
             Connection con = connect.getConn();
 
-            String query = "update user set email = ?, password = ?, name = ? , age = ? , address = ?, job = ? where id = ?";
+            String query = "UPDATE user SET email = ?, password = ?, name = ?, age = ?, address = ?, job = ? WHERE id = ?";
             PreparedStatement pstmt = con.prepareStatement(query);
-            pstmt.setString(1, email);
-            pstmt.setString(2, password);
-            pstmt.setString(3, name);
-            pstmt.setInt(4, age);
-            pstmt.setString(5, address);
-            pstmt.setString(6, job);
-            pstmt.setInt(7, id);
+            pstmt.setString(1, user.getEmail());
+            pstmt.setString(2, user.getPassword());
+            pstmt.setString(3, user.getName());
+            pstmt.setInt(4, user.getAge());
+            pstmt.setString(5, user.getAddress());
+            pstmt.setString(6, user.getJob());
+            pstmt.setInt(7, user.getId());
             pstmt.executeUpdate();
 
-            JOptionPane.showMessageDialog(parent, "Ban da cap nhat thanh cong!");
+            JOptionPane.showMessageDialog(parent, "Bạn đã cập nhật thành công!");
             notify();
         } catch (Exception e) {
             System.out.println("Err: " + e);
         }
     }
 
-    public void DeleteUser(int id,JFrame parent) {
+    public void deleteUser(int id,JFrame parent) {
         try {
             Connect connect = new Connect();
             Connection con = connect.getConn();

@@ -8,6 +8,7 @@ import controllers.UserController;
 import java.sql.ResultSet;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import model.User;
 
 /**
  *
@@ -228,10 +229,12 @@ public class ManageUser extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Nhap day du cac truong!");
             return;
         }
+        User user = new User(email, password, name, Integer.parseInt(age), address, job);
         try {
 
             UserController userController = new UserController();
-            userController.CreateUser(email, password, name, Integer.parseInt(age), address, job, this);
+            userController.createUser(user, this);
+            showTable("select * from user");
         } catch (Exception e) {
             System.out.println("Err: " + e);
         }
@@ -261,12 +264,13 @@ public class ManageUser extends javax.swing.JFrame {
             jtxtAge.setText("" + age);
             jtxtAddress.setText(adress);
             jtxtJob.setText(job);
-        }else{
+        } else if (choice == JOptionPane.NO_OPTION) {
             int idTable = Integer.parseInt(this.jtbUser.getModel().getValueAt(row, 0).toString());
             UserController userController = new UserController();
-            userController.DeleteUser(idTable, this);
+            userController.deleteUser(idTable, this);
             showTable("select * from user");
         }
+
 
     }//GEN-LAST:event_jtbUserMouseClicked
 
@@ -278,13 +282,14 @@ public class ManageUser extends javax.swing.JFrame {
         String age = jtxtAge.getText();
         String address = jtxtAddress.getText();
         String job = jtxtJob.getText();
+
         if (email.isEmpty() || password.isEmpty() || name.isEmpty() || age.isEmpty() || address.isEmpty() || job.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Nhap day du cac truong!");
             return;
         }
-        
+        User user = new User(id, email, password, name, Integer.parseInt(age), address, job);
         UserController userController = new UserController();
-        userController.updateUser(email, password, name,  Integer.parseInt(age), address, job, id, this);
+        userController.updateUser(user, this);
         this.id = -1;
         showTable("select * from user");
     }//GEN-LAST:event_jBtnUpdateMouseClicked

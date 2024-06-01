@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-
+import view.ManageUser;
 /**
  *
  * @author Hoa Le
@@ -176,6 +176,9 @@ public class DangNhap extends javax.swing.JFrame {
             }
             if (ok) {
                  JOptionPane.showMessageDialog(this, "Bạn đăng nhập thành công");
+                 ManageUser man = new ManageUser();
+                 man.setVisible(true);
+                 this.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Bạn đăng nhập sai mật khẩu hoặc password");
             }
