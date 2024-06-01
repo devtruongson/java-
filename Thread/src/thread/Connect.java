@@ -32,7 +32,11 @@ public class Connect {
         String sql = "select * from " + tbname;
         rs = ts.executeQuery(sql);
         return rs;
-
     }
 
+    public Connection getConn() {
+        return conn;
+    }
+
+    
 }
