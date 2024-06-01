@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import model.User;
+import thread.TinhToan;
 
 /**
  *
@@ -16,7 +17,13 @@ import model.User;
  */
 public class ManageUser extends javax.swing.JFrame {
 
+    private static final Object lock = new Object();
     private int id = -1;
+    Thread thread1;
+    Thread thread2;
+    Thread thread3;
+    Thread thread4;
+    Thread thread5;
 
     /**
      * Creates new form ManageUser
@@ -51,6 +58,7 @@ public class ManageUser extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jtbUser = new javax.swing.JTable();
         jBtnUpdate = new javax.swing.JButton();
+        btnFormTinh = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -110,6 +118,13 @@ public class ManageUser extends javax.swing.JFrame {
             }
         });
 
+        btnFormTinh.setText("Form tính (DEMO Thread)");
+        btnFormTinh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFormTinhActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -141,6 +156,8 @@ public class ManageUser extends javax.swing.JFrame {
                 .addComponent(jbtnCreate)
                 .addGap(44, 44, 44)
                 .addComponent(jBtnUpdate)
+                .addGap(18, 18, 18)
+                .addComponent(btnFormTinh)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -180,64 +197,80 @@ public class ManageUser extends javax.swing.JFrame {
                 .addGap(38, 38, 38)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jbtnCreate)
-                    .addComponent(jBtnUpdate))
+                    .addComponent(jBtnUpdate)
+                    .addComponent(btnFormTinh))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 452, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void showTable(String query) {
-        DefaultTableModel model = (DefaultTableModel) this.jtbUser.getModel();
-        model.setRowCount(0);
-        if (id == -1) {
-            jBtnUpdate.enable(false);
-        }
-        jtxtEmail.enable(true);
-        try {
-            UserController userController = new UserController();
-            ResultSet users = userController.getAllUser(query);
-            while (users.next()) {
-                int id = users.getInt("id");
-                String email = users.getString("email");
-                String password = users.getString("password");
-                String name = users.getString("name");
-                int age = users.getInt("age");
-                String adress = users.getString("address");
-                String job = users.getString("job");
+        thread1 = new Thread(() -> {
+            synchronized (lock) {
+                if (thread1.isAlive()) {
+                    System.out.println("Thread 1 đang chạy");
+                } else {
+                    System.out.println("Thread 1 đã dừng");
+                }
+                DefaultTableModel model = (DefaultTableModel) this.jtbUser.getModel();
+                model.setRowCount(0);
+                try {
+                    UserController userController = new UserController();
+                    ResultSet users = userController.getAllUser(query);
+                    while (users.next()) {
+                        int id = users.getInt("id");
+                        String email = users.getString("email");
+                        String password = users.getString("password");
+                        String name = users.getString("name");
+                        int age = users.getInt("age");
+                        String adress = users.getString("address");
+                        String job = users.getString("job");
 
-                Object[] dataTable = {id, email, password, name, age, adress, job};
-                DefaultTableModel table = (DefaultTableModel) this.jtbUser.getModel();
-                table.addRow(dataTable);
+                        Object[] dataTable = {id, email, password, name, age, adress, job};
+                        DefaultTableModel table = (DefaultTableModel) this.jtbUser.getModel();
+                        table.addRow(dataTable);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error" + e);
+                }
+                lock.notify();
             }
-        } catch (Exception e) {
-            System.out.println("Error" + e);
-        }
+        });
+        thread1.start();
+
     }
 
     private void jbtnCreateMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbtnCreateMouseClicked
         // TODO add your handling code here:
-        String email = jtxtEmail.getText();
-        String password = jtxtPassword.getText();
-        String name = jtxtName.getText();
-        String age = jtxtAge.getText();
-        String address = jtxtAddress.getText();
-        String job = jtxtJob.getText();
-        if (email.isEmpty() || password.isEmpty() || name.isEmpty() || age.isEmpty() || address.isEmpty() || job.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Nhap day du cac truong!");
-            return;
-        }
-        User user = new User(email, password, name, Integer.parseInt(age), address, job);
-        try {
+        thread2 = new Thread(() -> {
+            synchronized (lock) {
 
-            UserController userController = new UserController();
-            userController.createUser(user, this);
-            showTable("select * from user");
-        } catch (Exception e) {
-            System.out.println("Err: " + e);
-        }
+                String email = jtxtEmail.getText();
+                String password = jtxtPassword.getText();
+                String name = jtxtName.getText();
+                String age = jtxtAge.getText();
+                String address = jtxtAddress.getText();
+                String job = jtxtJob.getText();
+                if (email.isEmpty() || password.isEmpty() || name.isEmpty() || age.isEmpty() || address.isEmpty() || job.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Nhap day du cac truong!");
+                    return;
+                }
+                User user = new User(email, password, name, Integer.parseInt(age), address, job);
+                try {
+
+                    UserController userController = new UserController();
+                    userController.createUser(user, this);
+                    showTable("select * from user");
+                } catch (Exception e) {
+                    System.out.println("Err: " + e);
+                }
+            }
+        });
+        thread2.start();
+
     }//GEN-LAST:event_jbtnCreateMouseClicked
 
     private void jtbUserMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jtbUserMouseClicked
@@ -247,28 +280,40 @@ public class ManageUser extends javax.swing.JFrame {
         int choice = JOptionPane.showOptionDialog(null, "Bạn muốn sửa hay xóa?", "Lựa chọn", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
         if (choice == JOptionPane.YES_OPTION) {
-            int idTable = Integer.parseInt(this.jtbUser.getModel().getValueAt(row, 0).toString());
-            this.id = idTable;
-            String email = this.jtbUser.getModel().getValueAt(row, 1).toString();
-            String password = this.jtbUser.getModel().getValueAt(row, 2).toString();
-            String name = this.jtbUser.getModel().getValueAt(row, 3).toString();
-            int age = Integer.parseInt(this.jtbUser.getModel().getValueAt(row, 4).toString());
-            String adress = this.jtbUser.getModel().getValueAt(row, 5).toString();
-            String job = this.jtbUser.getModel().getValueAt(row, 6).toString();
+            thread3 = new Thread(() -> {
+                synchronized (lock) {
+                    int idTable = Integer.parseInt(this.jtbUser.getModel().getValueAt(row, 0).toString());
+                    this.id = idTable;
+                    String email = this.jtbUser.getModel().getValueAt(row, 1).toString();
+                    String password = this.jtbUser.getModel().getValueAt(row, 2).toString();
+                    String name = this.jtbUser.getModel().getValueAt(row, 3).toString();
+                    int age = Integer.parseInt(this.jtbUser.getModel().getValueAt(row, 4).toString());
+                    String adress = this.jtbUser.getModel().getValueAt(row, 5).toString();
+                    String job = this.jtbUser.getModel().getValueAt(row, 6).toString();
 
-            jtxtEmail.enable(false);
-            jBtnUpdate.enable(true);
-            jtxtEmail.setText(email);
-            jtxtPassword.setText(password);
-            jtxtName.setText(name);
-            jtxtAge.setText("" + age);
-            jtxtAddress.setText(adress);
-            jtxtJob.setText(job);
+                    jtxtEmail.setText(email);
+                    jtxtPassword.setText(password);
+                    jtxtName.setText(name);
+                    jtxtAge.setText("" + age);
+                    jtxtAddress.setText(adress);
+                    jtxtJob.setText(job);
+
+                }
+            });
+            thread3.start();
+
         } else if (choice == JOptionPane.NO_OPTION) {
-            int idTable = Integer.parseInt(this.jtbUser.getModel().getValueAt(row, 0).toString());
-            UserController userController = new UserController();
-            userController.deleteUser(idTable, this);
-            showTable("select * from user");
+            thread4 = new Thread(() -> {
+                synchronized (lock) {
+                    int idTable = Integer.parseInt(this.jtbUser.getModel().getValueAt(row, 0).toString());
+                    UserController userController = new UserController();
+                    userController.deleteUser(idTable, this);
+                    showTable("select * from user");
+
+                }
+            });
+            thread4.start();
+
         }
 
 
@@ -276,23 +321,37 @@ public class ManageUser extends javax.swing.JFrame {
 
     private void jBtnUpdateMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jBtnUpdateMouseClicked
         // TODO add your handling code here:
-        String email = jtxtEmail.getText();
-        String password = jtxtPassword.getText();
-        String name = jtxtName.getText();
-        String age = jtxtAge.getText();
-        String address = jtxtAddress.getText();
-        String job = jtxtJob.getText();
+        thread5 = new Thread(() -> {
+            synchronized (lock) {
+                String email = jtxtEmail.getText();
+                String password = jtxtPassword.getText();
+                String name = jtxtName.getText();
+                String age = jtxtAge.getText();
+                String address = jtxtAddress.getText();
+                String job = jtxtJob.getText();
 
-        if (email.isEmpty() || password.isEmpty() || name.isEmpty() || age.isEmpty() || address.isEmpty() || job.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Nhap day du cac truong!");
-            return;
-        }
-        User user = new User(id, email, password, name, Integer.parseInt(age), address, job);
-        UserController userController = new UserController();
-        userController.updateUser(user, this);
-        this.id = -1;
-        showTable("select * from user");
+                if (email.isEmpty() || password.isEmpty() || name.isEmpty() || age.isEmpty() || address.isEmpty() || job.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Nhap day du cac truong!");
+                    return;
+                }
+                User user = new User(id, email, password, name, Integer.parseInt(age), address, job);
+                UserController userController = new UserController();
+                userController.updateUser(user, this);
+                this.id = -1;
+                showTable("select * from user");
+
+            }
+        });
+        thread5.start();
+
     }//GEN-LAST:event_jBtnUpdateMouseClicked
+
+    private void btnFormTinhActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFormTinhActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+        TinhToan tt = new TinhToan();
+        tt.setVisible(true);
+    }//GEN-LAST:event_btnFormTinhActionPerformed
 
     /**
      * @param args the command line arguments
@@ -330,6 +389,7 @@ public class ManageUser extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnFormTinh;
     private javax.swing.JButton jBtnUpdate;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
