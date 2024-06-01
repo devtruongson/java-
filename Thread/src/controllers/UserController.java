@@ -56,8 +56,6 @@ public class UserController {
         PreparedStatement pstmt = null;
         ResultSet users = null;
 
-        System.out.println("Query: " + query);
-
         try {
             Connect connect = new Connect();
             con = connect.getConn();
